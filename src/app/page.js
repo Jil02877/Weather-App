@@ -1,101 +1,111 @@
-import Image from "next/image";
-
+'use client'
+import Navbar from "@/Components/Navbar";
+import axios from "axios";
+import { useQuery } from "react-query";
+import { TailSpin } from "react-loader-spinner";
+import { format, parseISO } from "date-fns";
+import Container from "@/Components/Container";
+import Sec_Container from "@/Components/Sec_Container";
+import THE_Container from "@/Components/THE_Container";
+import For_Container from "@/Components/For_Container";
+import { useAtom } from "jotai";
+import { loadingCityAtom, placeAtom } from "./atom";
+import { useEffect } from "react";
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [place, setPlace] = useAtom(placeAtom)
+  const [_, setLoadingCityAtom] = useAtom(loadingCityAtom)
+  const { data, error, isLoading } = useQuery('repoData', async () => {
+    const { data } = await axios.get(`http://api.openweathermap.org/data/2.5/forecast?q=${place}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}&cnt=56`);
+    return data;
+  
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  
+
+  const firstData = data?.list[0];
+  console.log(firstData);
+  console.log('data', data);
+
+  const uniqueDates = [
+    ...new Set(
+      data?.list.map(
+        (entry) => new Date(entry.dt * 1000).toISOString().split("T")[0]
+      )
+    )
+  ];
+
+  const firstDataForEachDate = uniqueDates
+    .map((date) => {
+      if (!data?.list) return null;
+      return data.list.find((entry) => {
+        const entryDate = new Date(entry.dt * 1000).toISOString().split('T')[0];
+        const entryTime = new Date(entry.dt * 1000).getHours();
+        return entryDate === date && entryTime >= 6;
+      });
+    })
+    .filter(Boolean);
+
+  console.log("Unique Dates: ", uniqueDates);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen p-5 mx-auto">
+        <TailSpin
+          height="80"
+          width="80"
+          color="#0000FF"
+          ariaLabel="tail-spin-loading"
+          radius="1"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+        />
+      </div>
+    );
+  }
+
+  if (error) return 'An error has occurred: ' + error.message;
+
+  return (
+    <>
+      <Navbar />
+      <div className="bg-gray-200">
+        <main className="min-h-screen container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Today's Weather */}
+          <section className="flex flex-col gap-6">
+            <h3 className="flex flex-col sm:flex-row items-start sm:items-end text-2xl gap-2 font-semibold">
+              <span>{format(parseISO(firstData?.dt_txt ?? ''), 'EEEE')}</span>
+              <span className="text-lg">{format(parseISO(firstData?.dt_txt ?? ''), '(dd-MM-yyyy)')}</span>
+            </h3>
+
+            <Container {...firstData} {...data} />
+
+            <div className="weather_condition flex flex-col lg:flex-row gap-5">
+              {/* Left Container */}
+              <Sec_Container {...firstData} />
+              {/* Right Container */}
+              <THE_Container {...firstData} {...data} />
+            </div>
+          </section>
+
+          {/* 7-Day Forecast */}
+          <section className="flex flex-col gap-6 mt-5">
+            <h3 className="text-2xl font-semibold">Forecast (7 days)</h3>
+            <div className="weather_condition_7_Days flex flex-col lg:flex-row gap-7 overflow-x-auto">
+              {firstDataForEachDate.map((d, i) => (
+                <For_Container
+                  key={i}
+                  {...firstData}
+                  {...data}
+                  {...d}
+                  date={d?.dt_txt ? format(parseISO(d?.dt_txt), 'dd.MM') : 'Invalid Date'}
+                  day={d?.dt_txt ? format(parseISO(d?.dt_txt), 'EEEE') : 'Invalid Day'}
+                />
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
+    </>
   );
 }
