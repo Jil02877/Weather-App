@@ -36,7 +36,7 @@ const Navbar = () => {
     setCity(value);
     if (value.length >= 3) {
       try {
-        const res = await axios.get(`http://api.openweathermap.org/data/2.5/find?q=${value}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
+        const res = await axios.get(`https://api.openweathermap.org/data/2.5/find?q=${value}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
         const suggestions = res.data.list.map((item) => item.name);
         setSuggestions(suggestions);
         setError('');
@@ -61,7 +61,7 @@ const Navbar = () => {
     try {
       // Simulate loading delay with setTimeout
       setTimeout(async () => {
-        const res = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
+        const res = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
         setWeatherDetails(res.data);
         setPlace(cityName);
         setCity(cityName); // Update city to the selected city
@@ -85,7 +85,7 @@ const Navbar = () => {
           const {latitude,longitude} = postiton.coords
           try {
             setLoadingCity(true)
-            const res = await axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
+            const res = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_WEATHER_KEY}`);
             setTimeout(() => {
               setLoadingCity(false)
               setPlace(res.data.name)
