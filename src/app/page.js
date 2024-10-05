@@ -2,7 +2,6 @@
 import Navbar from "@/Components/Navbar";
 import axios from "axios";
 import { useQuery } from "react-query";
-import { TailSpin } from "react-loader-spinner";
 import { format, parseISO } from "date-fns";
 import Container from "@/Components/Container";
 import Sec_Container from "@/Components/Sec_Container";
